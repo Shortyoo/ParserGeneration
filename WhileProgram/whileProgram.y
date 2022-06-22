@@ -28,14 +28,14 @@ startSymb: program END{printf("\n\t\tSTART(%s)", $1);return 0;}
 	| program TILDE{printf("\n\t\tSTART(%s)", $1);return 0;}
 
 program:
-	loop program
+	loop SEMICOLON program
 		{
 			char* str;
 			str = add($1, ";");
 			str = add(str, $2);
 			$$ = str;
 		}
-	| assignment program
+	| assignment SEMICOLON program
 		{
 			char* str;
 			str = add($1, ";");
@@ -79,7 +79,7 @@ integer:
 		};
 	
 assignment:
-	variable EQUALS variable PLUS integer SEMICOLON
+	variable EQUALS variable PLUS integer
 		{
 			char* string;
 			char* eqString = buildPrefix($2, "EQUALS");
@@ -94,11 +94,6 @@ assignment:
 			free($5);
 			$$ = string;
 		}
-	|
-	SEMICOLON
-	{
-		$$ = addDontFree("", "~");
-	}
 	;
 	
 loop: 
