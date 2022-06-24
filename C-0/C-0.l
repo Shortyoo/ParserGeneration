@@ -8,12 +8,12 @@ int printSpaceTab = 0;
 %}
 
 %%
-"int" {yylval.str = strdup(yytext); return INT;}
-"bool" {yylval.str = strdup(yytext); return BOOL;}
-"char" {yylval.str = strdup(yytext); return CHAR;}
+"int" {yylval.str = strdup(yytext); return C_INT;}
+"bool" {yylval.str = strdup(yytext); return C_BOOL;}
+"char" {yylval.str = strdup(yytext); return C_CHAR;}
 "string" {yylval.str = strdup(yytext); return C_STRING;}
 "struct" {yylval.str = strdup(yytext); return STRUCT;}
-[true|false] {yylval.str = strdup(yytext); return BOOLEAN_VALUE;}
+(true|false) {yylval.str = strdup(yytext); return BOOLEAN_VALUE;}
 [A-Za-z_]+ {yylval.str = strdup(yytext); return STRING;}
 [0-9]+ {yylval.str = strdup(yytext); return NUMBER;}
 "[" {yylval.str = strdup(yytext); return ARR_OPEN;}
@@ -21,8 +21,11 @@ int printSpaceTab = 0;
 "{" {yylval.str = strdup(yytext); return BRACKET_OPEN;}
 "}" {yylval.str = strdup(yytext); return BRACKET_CLOSED;}
 "*"+ {yylval.str = strdup(yytext); return POINTER;}
+"==" {yylval.str = strdup(yytext); return BOOLEAN_EQUALS;}
 "=" {yylval.str = strdup(yytext); return EQUALS;}
 ";" {yylval.str = strdup(yytext); return SEMICOLON;}
+(\".*\") {yylval.str = strdup(yytext); return CHARSEQUENCE;}
+(\'.\') {yylval.str = strdup(yytext); return CHAR;}
 " " {}
 \t {}
 \n {}

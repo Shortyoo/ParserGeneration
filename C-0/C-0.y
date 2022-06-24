@@ -11,6 +11,11 @@
 #define declarationStr "DECLARATION"
 #define structStr "STRUCT"
 #define semicolonStr "SEMICOLON"
+#define assignmentStr "ASSIGNMENT"
+#define charsequenceStr "CHARSEQUENCE"
+#define charStr "CHAR"
+#define definitionStr "DEFINITION"
+#define equalsStr "EQUALS"
 
 extern int yylex();
 extern FILE *yyin;
@@ -30,9 +35,9 @@ int parseFile(const char* filename);
 }
 
 %type<str> startSymb datatype primitiveDatatype pointer struct array number declaration name
-%type<str> branching semicolon
-%token<str> INT BOOL CHAR C_STRING STRUCT BOOLEAN_VALUE STRING NUMBER ARR_OPEN ARR_CLOSED
-%token<str> BRACKET_OPEN BRACKET_CLOSED POINTER SEMICOLON END EQUALS
+%type<str> branching semicolon assignment charsequence definition equals instructions
+%token<str> C_INT C_BOOL C_CHAR C_STRING STRUCT BOOLEAN_VALUE STRING NUMBER ARR_OPEN ARR_CLOSED
+%token<str> BRACKET_OPEN BRACKET_CLOSED POINTER SEMICOLON END EQUALS CHARSEQUENCE CHAR BOOLEAN_EQUALS
 
 %%
 
@@ -41,10 +46,26 @@ startSymb: branching END
 	;
 
 branching:
-	declaration {$$ = $1;}
-	| struct {$$ = $1;}
+	instructions {$$ = $1;}
 	;
 	
+instructions:
+	declaration instructions {$$ = $1;}
+	| definition instructions {$$ = $1;}
+	| struct instructions {$$ = $1;}
+	| {$$ = "";} /*epsilon transition*/
+	;
+	
+
+declaration:
+	datatype name semicolon
+	{
+		char* string;
+		string = add($1, $2);
+		string = add(string, $3);
+		$$ = buildPrefix(string, declarationStr);
+	}
+	;
 
 datatype: primitiveDatatype {$$ = buildPrefix($1, datatypeStr);}
 	| primitiveDatatype pointer
@@ -68,25 +89,35 @@ struct:
 	}
 	;
 	
-declaration:
-	datatype name semicolon
+definition:
+	datatype assignment
 	{
-		char* string;
-		string = add($1, $2);
-		string = add(string, $3);
-		$$ = buildPrefix(string, declarationStr);
-	}
-	| datatype name semicolon declaration
-	{
-		char* string;
-		string = add($1, $2);
-		string = add(string, $3);
-		string = buildPrefix(string, declarationStr);
-		string = add(string, ",");
-		string = add(string, $4);
-		$$ = string;
+		char* string = add($1, $2);
+		$$ = buildPrefix(string, definitionStr);
 	}
 	;
+	
+assignment:
+	name equals number semicolon
+	{
+		char* string = add($1, $2);
+		string = add(string, $3);
+		string = add(string, $4);
+		$$ = buildPrefix(string, assignmentStr);
+	}
+	| name equals charsequence semicolon
+	{
+		char* string = add($1, $2);
+		string = add($2, $3);
+		$$ = buildPrefix(string, assignmentStr);
+	}
+	;
+	
+charsequence:
+	CHARSEQUENCE {$$ = buildPrefix($1, charsequenceStr);}
+	| CHAR {$$ = buildPrefix($1, charStr);}
+	;
+	
 	
 name: 
 	STRING {$$ = buildPrefix($1, nameStr);}
@@ -106,9 +137,9 @@ name:
 	;
 	
 primitiveDatatype:
-	INT {$$ = buildPrefix($1, primitiveDatatypeStr);}
-	| BOOL {$$ = buildPrefix($1, primitiveDatatypeStr);}
-	| CHAR {$$ = buildPrefix($1, primitiveDatatypeStr);}
+	C_INT {$$ = buildPrefix($1, primitiveDatatypeStr);}
+	| C_BOOL {$$ = buildPrefix($1, primitiveDatatypeStr);}
+	| C_CHAR {$$ = buildPrefix($1, primitiveDatatypeStr);}
 	| C_STRING {$$ = buildPrefix($1, primitiveDatatypeStr);}
 	;
 	
@@ -132,12 +163,15 @@ semicolon:
 	SEMICOLON {$$ = buildPrefix($1, semicolonStr);}
 	;
 
+equals:
+	EQUALS {$$ = buildPrefix($1, equalsStr);}
+	;
+
 %%
 
 int main(int argc, char* argv[]){
 	//printf("\n---MAIN---");
 	int result = -1;
-	
 	if(argc != 2){
 		for(int i = 2; i < argc; i++){
 			printf("\nParsing: %s", argv[i]);
@@ -187,6 +221,7 @@ char* addDontFree(char* s1, char* s2){
 	strcat(s, s2);
 	//printf("\ns1 %d\t s2 %d\t s %d", strlen(s1), strlen(s2), strlen(s));
 	//printf("\n\ts1 %s\n\ts2 %s\n\ts  %s", s1, s2, s);
+	printf("\nBuilt: %s", s);
 	return s;
 }
 
