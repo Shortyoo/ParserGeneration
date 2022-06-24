@@ -38,7 +38,7 @@ int parseFile(const char* filename);
 
 %type<str> startSymb datatype primitiveDatatype pointer struct array number declaration name
 %type<str> branching semicolon assignment charsequence definition equals instructions
-%type<str> expressionInt pointerRecursion operation
+%type<str> expressionInt pointerRecursion arrayRecursion operation
 %token<str> C_INT C_BOOL C_CHAR C_STRING STRUCT BOOLEAN_VALUE STRING NUMBER ARR_OPEN ARR_CLOSED
 %token<str> BRACKET_OPEN BRACKET_CLOSED SEMICOLON END EQUALS CHARSEQUENCE CHAR BOOLEAN_EQUALS
 %token<str> PLUS MINUS TIMES DIVIDE
@@ -167,8 +167,17 @@ primitiveDatatype:
 	;
 	
 pointer: pointerRecursion {$$ = $1;}
-	| array {$$ = $1;}
+	| arrayRecursion {$$ = $1;}
 	;
+	
+arrayRecursion:
+	array {$$ = $1;}
+	| array arrayRecursion
+	{
+		char* string = add($1, $2);
+		free($2);
+		$$ = buildPrefix(string, arrayStr);
+	}
 	
 pointerRecursion: /*To get recursions on pointer, like int*** */
 	TIMES {$$ = buildPrefix($1, pointerStr);}
