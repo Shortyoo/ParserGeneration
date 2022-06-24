@@ -1,0 +1,3 @@
+int x = 23489;
+char c = 'c';
+char* strr = "this is also a long string";
