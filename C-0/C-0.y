@@ -112,7 +112,7 @@ assignment:
 	| name equals charsequence semicolon
 	{
 		char* string = add($1, $2);
-		string = add($2, $3);
+		string = add(string, $3);
 		$$ = buildPrefix(string, assignmentStr);
 	}
 	;
@@ -124,8 +124,6 @@ expressionInt:
 		char* string;
 		string = add($1, $2);
 		string = add(string, $3);
-		free($2);
-		free($3);
 		$$ = buildPrefix(string, expressionIntStr);
 	}
 	
@@ -175,7 +173,6 @@ arrayRecursion:
 	| array arrayRecursion
 	{
 		char* string = add($1, $2);
-		free($2);
 		$$ = buildPrefix(string, arrayStr);
 	}
 	
@@ -184,7 +181,6 @@ pointerRecursion: /*To get recursions on pointer, like int*** */
 	| TIMES pointerRecursion
 	{
 		$$ = add(buildPrefix($1, pointerStr), $2);
-		free($2);
 	}
 	;
 	
@@ -271,18 +267,22 @@ char* addDontFree(char* s1, char* s2){
 char* add(char* s1, char* s2){
 	char* s = addDontFree(s1, s2);
 	free(s1);
+	free(s2);
 	return s;
 }
 
 char* buildPrefix(char* s1, char* prefix){
 	char* s;
-	char* scndThing = "(";
-	s = addDontFree(prefix, scndThing);
+	char* openingParenthesis = allocString(2);
+	openingParenthesis[0] = '(';
+	s = addDontFree(prefix, openingParenthesis);
 	//printf("\nsizes:\n\ts: %d\n\tp: %d\n\te: %d\n\t", strlen(prefix), strlen(scndThing), strlen(s));
 	//printf("\naddDontFree:\n\ts: %s\n\tp: %s\n\te: %s", prefix, "(", s);
 	s = add(s, s1);
-	s = add(s, ")");
-	free(s1);
+	char* closingParenthesis = allocString(2);
+	closingParenthesis[0] = ')';
+	s = add(s, closingParenthesis);
+
 	return s;
 }
 
