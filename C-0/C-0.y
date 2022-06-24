@@ -16,6 +16,8 @@
 #define charStr "CHAR"
 #define definitionStr "DEFINITION"
 #define equalsStr "EQUALS"
+#define operationStr "OPERATION"
+#define expressionIntStr "EXPRESSION"
 
 extern int yylex();
 extern FILE *yyin;
@@ -36,8 +38,10 @@ int parseFile(const char* filename);
 
 %type<str> startSymb datatype primitiveDatatype pointer struct array number declaration name
 %type<str> branching semicolon assignment charsequence definition equals instructions
+%type<str> expressionInt pointerRecursion operation
 %token<str> C_INT C_BOOL C_CHAR C_STRING STRUCT BOOLEAN_VALUE STRING NUMBER ARR_OPEN ARR_CLOSED
-%token<str> BRACKET_OPEN BRACKET_CLOSED POINTER SEMICOLON END EQUALS CHARSEQUENCE CHAR BOOLEAN_EQUALS
+%token<str> BRACKET_OPEN BRACKET_CLOSED SEMICOLON END EQUALS CHARSEQUENCE CHAR BOOLEAN_EQUALS
+%token<str> PLUS MINUS TIMES DIVIDE
 
 %%
 
@@ -98,7 +102,7 @@ definition:
 	;
 	
 assignment:
-	name equals number semicolon
+	name equals expressionInt semicolon
 	{
 		char* string = add($1, $2);
 		string = add(string, $3);
@@ -111,6 +115,25 @@ assignment:
 		string = add($2, $3);
 		$$ = buildPrefix(string, assignmentStr);
 	}
+	;
+	
+expressionInt:
+	number {$$ = $1;}
+	| number operation expressionInt
+	{
+		char* string;
+		string = add($1, $2);
+		string = add(string, $3);
+		free($2);
+		free($3);
+		$$ = buildPrefix(string, expressionIntStr);
+	}
+	
+operation:
+	PLUS {$$ = buildPrefix($1, operationStr);}
+	| MINUS {$$ = buildPrefix($1, operationStr);}
+	| TIMES {$$ = buildPrefix($1, operationStr);}
+	| DIVIDE {$$ = buildPrefix($1, operationStr);}
 	;
 	
 charsequence:
@@ -143,8 +166,17 @@ primitiveDatatype:
 	| C_STRING {$$ = buildPrefix($1, primitiveDatatypeStr);}
 	;
 	
-pointer: POINTER {$$ = buildPrefix($1, pointerStr);}
+pointer: pointerRecursion {$$ = $1;}
 	| array {$$ = $1;}
+	;
+	
+pointerRecursion: /*To get recursions on pointer, like int*** */
+	TIMES {$$ = buildPrefix($1, pointerStr);}
+	| TIMES pointerRecursion
+	{
+		$$ = add(buildPrefix($1, pointerStr), $2);
+		free($2);
+	}
 	;
 	
 array:

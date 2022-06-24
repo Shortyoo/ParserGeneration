@@ -20,9 +20,12 @@ int printSpaceTab = 0;
 "]" {yylval.str = strdup(yytext); return ARR_CLOSED;}
 "{" {yylval.str = strdup(yytext); return BRACKET_OPEN;}
 "}" {yylval.str = strdup(yytext); return BRACKET_CLOSED;}
-"*"+ {yylval.str = strdup(yytext); return POINTER;}
 "==" {yylval.str = strdup(yytext); return BOOLEAN_EQUALS;}
 "=" {yylval.str = strdup(yytext); return EQUALS;}
+"+" {yylval.str = strdup(yytext); return PLUS;}
+"-" {yylval.str = strdup(yytext); return MINUS;}
+"*" {yylval.str = strdup(yytext); return TIMES;}
+"/" {yylval.str = strdup(yytext); return DIVIDE;}
 ";" {yylval.str = strdup(yytext); return SEMICOLON;}
 (\".*\") {yylval.str = strdup(yytext); return CHARSEQUENCE;}
 (\'.\') {yylval.str = strdup(yytext); return CHAR;}
