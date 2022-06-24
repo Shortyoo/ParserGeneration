@@ -251,6 +251,7 @@ int yyerror(char *s){
 	return 0;
 }
 
+/// returns s = s1 + s2 but does NOT call free for neither s1 nor s2.
 char* addDontFree(char* s1, char* s2){
 	size_t size = strlen(s1) + strlen(s2);
 	char* s = allocString(size+1);
@@ -271,6 +272,8 @@ char* add(char* s1, char* s2){
 	return s;
 }
 
+/// Puts the prefix + brackets around s1
+/// i.e. let s1 = "ASDFGH", it returns "NAME(ASDFGH)"
 char* buildPrefix(char* s1, char* prefix){
 	char* s;
 	char* openingParenthesis = allocString(2);
@@ -286,6 +289,8 @@ char* buildPrefix(char* s1, char* prefix){
 	return s;
 }
 
+/// Allocates a string of the given size
+/// its in an extra function, as it also sets every value of the allocated memory to '\0'
 char* allocString(size_t size){
 	//printf("\nallocString:\n\tsize: %d", size);
 	char* s = (char *)malloc(size);
