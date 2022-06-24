@@ -18,6 +18,7 @@
 #define equalsStr "EQUALS"
 #define operationStr "OPERATION"
 #define expressionIntStr "EXPRESSION"
+#define referenceStr "REFERENCE"
 
 extern int yylex();
 extern FILE *yyin;
@@ -41,7 +42,7 @@ int parseFile(const char* filename);
 %type<str> expressionInt pointerRecursion arrayRecursion operation
 %token<str> C_INT C_BOOL C_CHAR C_STRING STRUCT BOOLEAN_VALUE STRING NUMBER ARR_OPEN ARR_CLOSED
 %token<str> BRACKET_OPEN BRACKET_CLOSED SEMICOLON END EQUALS CHARSEQUENCE CHAR BOOLEAN_EQUALS
-%token<str> PLUS MINUS TIMES DIVIDE
+%token<str> PLUS MINUS TIMES DIVIDE LOGICAL_AND
 
 %%
 
@@ -114,6 +115,19 @@ assignment:
 		char* string = add($1, $2);
 		string = add(string, $3);
 		$$ = buildPrefix(string, assignmentStr);
+	}
+	| name equals name semicolon // variables
+	{
+		char* string = add($1, $2);
+		string = add(string, $3);
+		$$ = add(string, $4);
+	}
+	| name equals LOGICAL_AND name semicolon // pointers
+	{
+		char* string = add($1, $2);
+		char* refPrefix = buildPrefix(add($3,$4), referenceStr);
+		string = add(string, refPrefix);
+		$$ = add(string, $5);
 	}
 	;
 	

@@ -27,6 +27,7 @@ int printSpaceTab = 0;
 "*" {yylval.str = strdup(yytext); return TIMES;}
 "/" {yylval.str = strdup(yytext); return DIVIDE;}
 ";" {yylval.str = strdup(yytext); return SEMICOLON;}
+"&" {yylval.str = strdup(yytext); return LOGICAL_AND;}
 (\".*\") {yylval.str = strdup(yytext); return CHARSEQUENCE;}
 (\'.\') {yylval.str = strdup(yytext); return CHAR;}
 " " {}
