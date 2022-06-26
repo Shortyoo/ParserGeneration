@@ -3,7 +3,9 @@
 LightRed='\033[1;31m';
 LightGray='\033[0;37m';
 
-echo "\tWe expect ${LightRed}1${LightGray} on every result."
+echo "\n"
+echo "We expect ${LightRed}1${LightGray} on every result."
+echo ""
 
 for folder in `ls -d */`
 do
